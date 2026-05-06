@@ -1,0 +1,91 @@
+diff --git a/fuzzers/Havoc_DMA/afl-fuzz.c b/fuzzers/Havoc_DMA/afl-fuzz.c
+index 2e128cc..a40d27b 100755
+--- a/fuzzers/Havoc_DMA/afl-fuzz.c
++++ b/fuzzers/Havoc_DMA/afl-fuzz.c
+@@ -842,6 +842,86 @@ static void add_to_queue(u8* fname, u32 len, u8 passed_det) {
+   }
+ 
+   last_path_time = get_cur_time();
++    /* Code added to record the exact time of seed generation (using the timestamp
++
++
++
++   * of Linux system yields imprecise result for some seeds in the queue). */
++
++
++  char exec_time_path[PATH_MAX] = {0};
++
++
++  snprintf(exec_time_path, PATH_MAX, "%s", out_dir); // Use the outdir as the base path
++
++
++
++
++
++  // Append "/tc_birth.csv" to the base path
++
++
++  strncat(exec_time_path, "/tc_birth.csv", PATH_MAX - strlen(exec_time_path) - 1);
++
++
++
++
++
++  // Open the file in append mode
++
++
++  FILE *fp = fopen(exec_time_path, "a");
++
++
++  if (fp == NULL) {
++
++
++    printf("Error in opening file: %s\n", exec_time_path);
++
++
++    return;
++
++
++  }
++
++
++
++
++
++  // Write the data to the file
++
++
++  char *queue_pos = strstr(fname, "/queue/");
++
++
++  u64 path_time_sec = 0;
++
++
++  if (queue_pos) {
++
++
++    path_time_sec=last_path_time-start_time;
++
++
++  } else {
++
++
++    u8* fp = strrchr(fname, '/');
++
++
++    fname = alloc_printf("%s/queue/id:%06u,orig:%s", out_dir, queued_paths-1, fp+1);
++
++
++  }
++
++
++  fprintf(fp, "\"%s\",%llu\n", fname, path_time_sec/1000);
++
++
++
++
++
++  fclose(fp);
+ 
+ }
+ 

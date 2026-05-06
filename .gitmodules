@@ -6,3 +6,6 @@
 	path = docker-setup/SPAFLPP
 	url = git@github.com:infosec-sogang/SPAFLPP.git
 	branch = spaflpp
+[submodule "docker-setup/HavocMAB"]
+	path = docker-setup/HavocMAB
+	url = https://github.com/MagicHavoc/Havoc-Study

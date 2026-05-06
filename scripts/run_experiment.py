@@ -9,7 +9,7 @@ BASE_DIR = os.path.join(os.path.dirname(__file__), os.pardir)
 CWD = os.path.abspath(os.getcwd())
 IMAGE_NAME = "splice-exp"
 OUTDIR_ROOT = "output"
-SUPPORTED_FUZZERS = ["aflpp", "spaflpp"]
+SUPPORTED_FUZZERS = ["aflpp", "spaflpp", "havocmab"]
 
 work_queue = queue.Queue()
 

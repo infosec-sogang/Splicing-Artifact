@@ -59,6 +59,14 @@ RUN ./setup_spaflpp.sh && rm -f setup_spaflpp.sh
 
 RUN apt-get update && apt-get install -y libgsl-dev lld && rm -rf /var/lib/apt/lists/*
 
+# HavocMAB
+COPY docker-setup/HavocMAB ./HavocMAB
+COPY docker-setup/havocmab_patch.diff ./
+COPY docker-setup/setup_havocmab.sh ./
+RUN ./setup_havocmab.sh && rm -f setup_havocmab.sh
+COPY docker-setup/build_with_havocmab.sh ./
+RUN ./build_with_havocmab.sh && rm -f build_with_havocmab.sh
+
 # Additional scripts and files needed to run experiments.
 RUN mkdir /output /box
 COPY docker-setup/seed /benchmark/seed
