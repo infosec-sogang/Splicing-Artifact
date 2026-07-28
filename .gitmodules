@@ -1,0 +1,8 @@
+[submodule "docker-setup/AFLPP"]
+	path = docker-setup/AFLPP
+	url = git@github.com:infosec-sogang/SPAFLPP.git
+	branch = aflpp
+[submodule "docker-setup/SPAFLPP"]
+	path = docker-setup/SPAFLPP
+	url = git@github.com:infosec-sogang/SPAFLPP.git
+	branch = spaflpp
