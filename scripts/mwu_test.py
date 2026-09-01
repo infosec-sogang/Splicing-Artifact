@@ -22,26 +22,36 @@ def read_last_coverage(outdir, bench_name, iter_cnt):
     return line_coverages, branch_coverages
 
 
+def vargha_delaney_a12(base, target):
+    greater = sum(1 for t in target for b in base if t > b)
+    ties = sum(1 for t in target for b in base if t == b)
+    return (greater + 0.5 * ties) / (len(target) * len(base))
+
+
 def compute_coverage_mwu(base_outdir, target_outdir, iter_cnt, bench_name):
 
     base_line_coverages, base_branch_coverages = read_last_coverage(base_outdir, bench_name, iter_cnt)
     target_line_coverages, target_branch_coverages = read_last_coverage(target_outdir, bench_name, iter_cnt)
 
-    # Perform Mann-Whitney U test (Two-sided: to test if there is any difference in performance)
+    # Perform Mann-Whitney U test.
     base_line_cov_avg = sum(base_line_coverages) / len(base_line_coverages)
     target_line_cov_avg = sum(target_line_coverages) / len(target_line_coverages)
-    _, line_p_value = mannwhitneyu(base_line_coverages, target_line_coverages, alternative = 'two-sided')
+    _, line_p_value = mannwhitneyu(base_line_coverages, target_line_coverages, alternative = 'less')
 
     base_branch_cov_avg = sum(base_branch_coverages) / len(base_branch_coverages)
     target_branch_cov_avg = sum(target_branch_coverages) / len(target_branch_coverages)
-    _, branch_p_value = mannwhitneyu(base_branch_coverages, target_branch_coverages, alternative = 'two-sided')
+    _, branch_p_value = mannwhitneyu(base_branch_coverages, target_branch_coverages, alternative = 'less')
+
+    # Vargha-Delaney A_12 effect size of the target over the base.
+    line_a12 = vargha_delaney_a12(base_line_coverages, target_line_coverages)
+    branch_a12 = vargha_delaney_a12(base_branch_coverages, target_branch_coverages)
 
     # Calculate difference rates ((target - base) / base)
     line_cov_diff = ((target_line_cov_avg - base_line_cov_avg) / base_line_cov_avg) * 100 if base_line_cov_avg else 0
     branch_cov_diff = ((target_branch_cov_avg - base_branch_cov_avg) / base_branch_cov_avg) * 100 if base_branch_cov_avg else 0
 
-    line_cov = (line_cov_diff, base_line_cov_avg, target_line_cov_avg, line_p_value)
-    branch_cov = (branch_cov_diff, base_branch_cov_avg, target_branch_cov_avg, branch_p_value)
+    line_cov = (line_cov_diff, base_line_cov_avg, target_line_cov_avg, line_p_value, line_a12)
+    branch_cov = (branch_cov_diff, base_branch_cov_avg, target_branch_cov_avg, branch_p_value, branch_a12)
 
     return (line_cov, branch_cov)
 
@@ -72,8 +82,8 @@ def analyze_bench_coverage(base_outdir, target_outdir, iter_cnt):
 
         line_cov, branch_cov = compute_coverage_mwu(base_outdir, target_outdir, iter_cnt, bench_name)
 
-        line_str = "%.1f%% (Base: %d, Target: %d), p-value: %.4f" % line_cov
-        branch_str = "%.1f%% (Base: %d, Target: %d), p-value: %.4f" % branch_cov
+        line_str = "%.1f%% (Base: %d, Target: %d), p-value: %.4f, A12: %.4f" % line_cov
+        branch_str = "%.1f%% (Base: %d, Target: %d), p-value: %.4f, A12: %.4f" % branch_cov
 
         print("[*] Benchmark: %s (Iter count: %d)" % (bench_name, iter_cnt))
         print("Line coverage rate (avg.): %s" % line_str)
